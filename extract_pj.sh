@@ -54,7 +54,7 @@ esac
 for i in $(seq 1 $N_GROUPS); do
     cd d"$i" || exit 1
     case $BUILD_PT in
-    4-)
+    41)
         printf "\n%s\n\n" 'building the outline'
         ffmpeg -hide_banner -y \
             -t 10 -f lavfi -i color=c=black:s=1920x1080 \
@@ -68,7 +68,7 @@ for i in $(seq 1 $N_GROUPS); do
         " outline.mp4
 
         ;;
-    4)
+    42)
         ffmpeg -hide_banner -y \
             -t 10 \
             -f lavfi -i color \
@@ -78,6 +78,26 @@ for i in $(seq 1 $N_GROUPS); do
         ffmpeg -hide_banner -y \
             -f lavfi -i color \
             -vf "drawtext=textfile=points.txt:
+        fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
+        fontsize=24:
+        fontcolor=yellow:
+        x=(w-text_w)/2:
+        y=(h-text_h)/2:
+        enable='between(t,0,10)':
+        " \
+            -frames:v 1 -update 1 text.png
+        ;;
+
+    4)
+        ffmpeg -hide_banner -y \
+            -t 10 \
+            -f lavfi -i color=c=black:s=720x1280\
+            -c:v libx264 -crf 23 black_bg.mp4
+
+        ffmpeg -hide_banner -y \
+            -f lavfi -i color=c=black:s=720x1280\
+            -vf "drawtext=
+        textfile=points.txt:
         fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
         fontsize=24:
         fontcolor=yellow:
