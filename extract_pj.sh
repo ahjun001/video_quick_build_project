@@ -7,10 +7,17 @@ clear
 # input variables
 N_GROUPS=1
 
-(($# == 0)) && ENTRY_PT=4 || ENTRY_PT=$1
+(($# == 0)) && SETUP_PT=4 || SETUP_PT=$1
 
-set -x
-case $ENTRY_PT in
+case $SETUP_PT in
+0)
+    VER_DIR=/opt/ffmpeg-6.0-amd64-static
+    # VER_DIR=/opt/ffmpeg-git-20230721-amd64-static
+    # VER_DIR=/opt/LosslessCut-linux-x64/resources
+    sudo ln -fs "$VER_DIR"/ffmpeg /usr/local/sbin/ffmpeg
+    sudo ln -fs "$VER_DIR"/ffprobe /usr/local/sbin/ffprobe
+    ;;
+
 1)
     printf "\n%s\n\n" 'write session bullet points'
     gvim ./points.txt
@@ -40,29 +47,36 @@ case $ENTRY_PT in
         cd ..
     done
     ;&
+esac
 
-4)
-    printf "\n%s\n\n" 'building the outline'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
-        # ffmpeg -hide_banner -y \
-        #     -t 10 -f lavfi -i color=c=black:s=1920x1080 \
-        #     -vf "drawtext=textfile=points.txt:
-        # fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
-        # fontsize=48:
-        # fontcolor=yellow:
-        # x=(w-tw)/2:
-        # y=(h-th)/2:
-        # line_spacing=50
-        # " outline.mp4
+(($# == 0)) && BUILD_PT=4 || BUILD_PT=$1
 
+for i in $(seq 1 $N_GROUPS); do
+    cd d"$i" || exit 1
+    case $BUILD_PT in
+    4-)
+        printf "\n%s\n\n" 'building the outline'
+        ffmpeg -hide_banner -y \
+            -t 10 -f lavfi -i color=c=black:s=1920x1080 \
+            -vf "drawtext=textfile=points.txt:
+        fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
+        fontsize=48:
+        fontcolor=yellow:
+        x=(w-tw)/2:
+        y=(h-th)/2:
+        line_spacing=50
+        " outline.mp4
+
+        ;;
+    4)
         ffmpeg -hide_banner -y \
             -t 10 \
-            -f lavfi -i color=c=black:s=1280x720 \
-            -c:v libx264 -pix_fmt yuv420p black_bg.mp4
+            -f lavfi -i color \
+            -c:v libx264 -crf 23 black_bg.mp4
 
-        ffmpeg -y \
-            -f lavfi -i color=c=0x00000000:s=1280x720 \
+        # drawtext=textfile_line_ratio=0.5:
+        ffmpeg -hide_banner -y \
+            -f lavfi -i color \
             -vf "drawtext=textfile=points.txt:
         fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
         fontsize=24:
@@ -70,25 +84,22 @@ case $ENTRY_PT in
         x=(w-text_w)/2:
         y=(h-text_h)/2:
         enable='between(t,0,10)':
-        " text.png
+        " \
+            -frames:v 1 -update 1 text.png
 
         ffmpeg -hide_banner -y \
             -i black_bg.mp4 \
-        -i text.png \
-        -filter_complex "
+            -i text.png \
+            -filter_complex "
         [0:v][1:v]
         overlay=(main_w-overlay_w)/2:
         (main_h-overlay_h)/2
         " \
-        -pix_fmt yuv420p output.mp4
-        cd ..
-    done
-    ;&
+            -pix_fmt yuv420p outline.mp4
+        ;;
 
-5)
-    printf "\n%s\n\n" 'making subtitles files'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
+    5)
+        printf "\n%s\n\n" 'making subtitles files'
         rm -f points.srt
         S=1
         END=0
@@ -100,14 +111,10 @@ case $ENTRY_PT in
             printf "%s\n\n" "$L"
             ((S++))
         done <points.txt >>points.srt
-        cd ..
-    done
-    ;&
+        ;&
 
-6)
-    printf "\n%s\n\n" 'removing audio and adding silent soundtrack'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
+    6)
+        printf "\n%s\n\n" 'removing audio and adding silent soundtrack'
         for f in ?.mp4; do
             j="${f%.mp4}"
             ffmpeg -hide_banner -y \
@@ -115,28 +122,20 @@ case $ENTRY_PT in
                 -f lavfi -t 10 -i anullsrc=r=48000:cl=stereo \
                 -c:v copy -c:a aac -strict experimental -map 0:v -map 1:a "$j"_silent.mp4
         done
-        cd ..
-    done
-    ;&
+        ;&
 
-7)
-    printf "\n%s\n\n" 'making slow motion passage'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
+    7)
+        printf "\n%s\n\n" 'making slow motion passage'
         for f in ?.mp4; do
             j="${f%.mp4}"
             ffmpeg -hide_banner -y \
                 -i "$j"_silent.mp4 -filter:v "setpts=5.0*PTS" "$j"_slow_mo_no_subs.mp4
 
         done
-        cd ..
-    done
-    ;&
+        ;&
 
-8)
-    printf "\n%s\n\n" 'Pasting subtitles in slow-mo video'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
+    8)
+        printf "\n%s\n\n" 'Pasting subtitles in slow-mo video'
         for f in ?.mp4; do
             j="${f%.mp4}"
             ffmpeg -hide_banner -y \
@@ -151,14 +150,10 @@ PrimaryColour=&H0000ffff&\
 '" \
                 -c:a copy "$j"_slow_mo_subs.mp4
         done
-        cd ..
-    done
-    ;&
+        ;&
 
-9)
-    printf "\n%s\n\n" 'concatenating files'
-    for i in $(seq 1 $N_GROUPS); do
-        cd d"$i" || exit 1
+    9)
+        printf "\n%s\n\n" 'concatenating files'
         for f in ?.mp4; do
             j="${f%.mp4}"
             ffmpeg -hide_banner -y \
@@ -183,9 +178,9 @@ PrimaryColour=&H0000ffff&\
             # -i ../license.mp4 \
 
         done
-        cd ..
-    done
-    ;&
+        ;&
 
-*) echo $'\nfall through down to here\nfinished' ;&
-esac
+    *) echo $'\nfall through down to here\nfinished' ;&
+    esac
+    cd ..
+done

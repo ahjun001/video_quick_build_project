@@ -1,0 +1,1 @@
+            -vf "drawtext=textfile=points.txt:
