@@ -47,13 +47,15 @@ As a first attempt, workflow should be:
 *** use bash case esac structure, get each step in one case, fall through with ;&
 *** still not foolproofed, good handling of GUI apps is key
 
-+
-+
-+
+<br/>
+<br>
+
 [olist,style=none]
 ___
 ___
 
+pass[]
+pass[]
 * `ffmpeg` is powerful but complex:
 ** LMint's version is very old
 ** Versions provided by ppas are either not available for Ubuntu 'jammy' or barely younger
