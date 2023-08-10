@@ -47,6 +47,9 @@ As a first attempt, workflow should be:
 *** use bash case esac structure, get each step in one case, fall through with ;&
 *** still not foolproofed, good handling of GUI apps is key
 
++
++
++
 [olist,style=none]
 ___
 ___
