@@ -42,18 +42,24 @@ As a first attempt, workflow should be:
 
 == Lessons learned: Technical issues or time over-consuming steps encountered during project & resolutions / mitigations 
 
-. Mixing GUI and CLI packages in the workflow
-. Resolution: still not foolproofed, good handling of GUI apps is key
+* Mixing GUI and CLI packages in the workflow
+** Resolution:
+*** use bash case esac structure, get each step in one case, fall through with ;&
+*** still not foolproofed, good handling of GUI apps is key
 
-. `ffmpeg` is powerful but complex:
-.. LMint's version is very old
-.. Versions provided by ppas are either not available for Ubuntu 'jammy' or barely younger
-.. Compiled version showed to require many compiled flags that could not be set in advanced, leading to many unsuccessful compilations
-.. New versions of ffmpeg required to upgrade libraries, breaking apt dependencies
-. Resolutions - still being investigated:
-.. use `losslesscut` version of `ffmpeg`
-.. use compiled versions from https://johnvansickle.com/ffmpeg/
-.. use containers to isolate packages
+[olist,style=none]
+___
+___
+
+* `ffmpeg` is powerful but complex:
+** LMint's version is very old
+** Versions provided by ppas are either not available for Ubuntu 'jammy' or barely younger
+** Compiled version showed to require many compiled flags that could not be set in advanced, leading to many unsuccessful compilations
+** New versions of ffmpeg required to upgrade libraries, breaking apt dependencies
+** Resolutions - still being investigated:
+*** use `losslesscut` version of `ffmpeg`
+*** use compiled versions from https://johnvansickle.com/ffmpeg/
+*** use containers to isolate packages
 
 
 
