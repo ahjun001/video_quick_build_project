@@ -1,0 +1,60 @@
+= Video quick build project
+:backend: asciidoctor
+:github-flavored:  // enables GitHub-specific features like tables, task lists, and fenced code blocks
+ifndef::env-github[:icons: font]
+ifdef::env-github[]
+// Naughty Waco Temps
+:note-caption: :paperclip:
+:tip-caption: :bulb:
+:warning-caption: :warning:
+:caution-caption: :fire:
+:important-caption: :exclamation:
+endif::[]
+:toc: // gets a ToC after the title
+:toclevels: 2
+// :sectnums: // gets ToC sections to be numbered
+:sectnumlevels: 3 // max # of numbering levels
+
+== Summary
+
+The goal of this project is to point out the specificities of all movement techniques, likely from one to four, contained in a 5' footage, so that they can be individually studied and make one's own with visualization methods described by Bren Veziroglu here: https://youtu.be/rFUd1uoIi9U
+
+== Workflow
+
+As a first attempt, workflow should be:
+
+. Write bullet points to be illustrated in a text file
+. Group them by the one to four movement techniques
+. Extract footagefrom the main video to best illustrate each technique, 
+. Make a silent version, a slow-motion version, attach points as subtitles to the slow-motion version
+. Concatenate an outline, silent version, slowmo w/ subs version, and initial version of each extract so that they can be used as input in Bren Veziroglu's protocol. 
+. Transition panes can be added to embellish the final product if needed.
+
+== Technically
+
+. Automatize production of the deliverable as much as can be
+. Use least number of packages:
+.. `ffmpeg` for bash script video manipulations
+.. `losslesscut` for extracting footage and repositioning subtitles
+.. `kdenlive` as alternative to 'losslesscut'
+. Group extracts by the one to four techniques, one subdirectory for each, named d1, d2, ...
+. From each extract, automatically produce silent, slowmo, slowmo_with_subs version
+
+== Lessons learned: Technical issues or time over-consuming steps encountered during project & resolutions / mitigations 
+
+. Mixing GUI and CLI packages in the workflow
+. Resolution: still not foolproofed, good handling of GUI apps is key
+
+. `ffmpeg` is powerful but complex:
+.. LMint's version is very old
+.. Versions provided by ppas are either not available for Ubuntu 'jammy' or barely younger
+.. Compiled version showed to require many compiled flags that could not be set in advanced, leading to many unsuccessful compilations
+.. New versions of ffmpeg required to upgrade libraries, breaking apt dependencies
+. Resolutions - still being investigated:
+.. use `losslesscut` version of `ffmpeg`
+.. use compiled versions from https://johnvansickle.com/ffmpeg/
+.. use containers to isolate packages
+
+
+
+
