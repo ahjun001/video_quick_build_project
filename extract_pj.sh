@@ -7,12 +7,11 @@ clear
 # input variables
 N_GROUPS=1
 
-(($# == 0)) && SETUP_PT=4 || SETUP_PT=$1
+(($# == 0)) && SETUP_PT=0 || SETUP_PT=$0
 
 case $SETUP_PT in
 0)
     VER_DIR=/opt/ffmpeg-6.0-amd64-static
-    # VER_DIR=/opt/ffmpeg-git-20230721-amd64-static
     # VER_DIR=/opt/LosslessCut-linux-x64/resources
     sudo ln -fs "$VER_DIR"/ffmpeg /usr/local/sbin/ffmpeg
     sudo ln -fs "$VER_DIR"/ffprobe /usr/local/sbin/ffprobe
@@ -55,51 +54,20 @@ for i in $(seq 1 $N_GROUPS); do
     cd d"$i" || exit 1
     case $BUILD_PT in
     41)
-        printf "\n%s\n\n" 'building the outline'
-        ffmpeg -hide_banner -y \
-            -t 10 -f lavfi -i color=c=black:s=1920x1080 \
-            -vf "drawtext=textfile=points.txt:
-        fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
-        fontsize=48:
-        fontcolor=yellow:
-        x=(w-tw)/2:
-        y=(h-th)/2:
-        line_spacing=50
-        " outline.mp4
-
-        ;;
-    42)
+        SIZE=720x1280
+        rm -f black_bg.mp4 text.png outline.mp4
         ffmpeg -hide_banner -y \
             -t 10 \
-            -f lavfi -i color \
+            -f lavfi -i color=c=black:s=$SIZE \
             -c:v libx264 -crf 23 black_bg.mp4
 
-        # drawtext=textfile_line_ratio=0.5:
-        ffmpeg -hide_banner -y \
-            -f lavfi -i color \
-            -vf "drawtext=textfile=points.txt:
-        fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
-        fontsize=24:
-        fontcolor=yellow:
-        x=(w-text_w)/2:
-        y=(h-text_h)/2:
-        enable='between(t,0,10)':
-        " \
-            -frames:v 1 -update 1 text.png
-        ;;
-
-    4)
-        ffmpeg -hide_banner -y \
-            -t 10 \
-            -f lavfi -i color=c=black:s=720x1280\
-            -c:v libx264 -crf 23 black_bg.mp4
-
-        ffmpeg -hide_banner -y \
-            -f lavfi -i color=c=black:s=720x1280\
+        # ffmpeg -hide_banner -y \
+        ffmpeg -y \
+            -f lavfi -i color=c=black:s=$SIZE \
             -vf "drawtext=
         textfile=points.txt:
         fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
-        fontsize=24:
+        fontsize=12:
         fontcolor=yellow:
         x=(w-text_w)/2:
         y=(h-text_h)/2:
@@ -118,6 +86,40 @@ for i in $(seq 1 $N_GROUPS); do
             -pix_fmt yuv420p outline.mp4
         ;;
 
+    4)
+        set -x
+        SIZE=720x1280
+        rm -f black_bg.mp4 text.png outline.mp4
+        ffmpeg -hide_banner -y \
+            -t 10 \
+            -f lavfi -i color=c=black:s=$SIZE \
+            -c:v libx264 -crf 23 black_bg.mp4
+
+        ffmpeg -hide_banner -y \
+            -f lavfi -i color=c=black:s=$SIZE \
+            -filter_complex "
+            drawtext=fontfile=/usr/share/fonts/truetype/ubuntu/Ubuntu-BI.ttf:
+            textfile=points.txt:
+            fontsize=12:
+            fontcolor=yellow:
+            x=(w-text_w)/2:
+            y=(h-text_h)/2:
+            enable='between(t,0,10)':
+            xpad=10:
+            " \
+            -frames:v 1 -update 1 text.png
+
+        ffmpeg -hide_banner -y \
+            -i black_bg.mp4 \
+            -i text.png \
+            -filter_complex "
+        [0:v][1:v]
+        overlay=(main_w-overlay_w)/2:
+        (main_h-overlay_h)/2
+        " \
+            -pix_fmt yuv420p outline.mp4
+
+        ;;
     5)
         printf "\n%s\n\n" 'making subtitles files'
         rm -f points.srt
